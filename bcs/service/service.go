@@ -101,9 +101,10 @@ func CreatePost(post *Post) (int64, error) {
 
 // GetPost retrieves a post by its ID
 func GetPost(id int) (*Post, error) {
-	post := &Post{}
+	var post Post
+	var createdAt NullTime
 	err := db.QueryRow("SELECT id, title, content, createdAt, author, category, updatedAt, likesCount, authorId, isPublished, views FROM posts WHERE id = ?", id).Scan(
-		&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.Author, &post.Category, &post.UpdatedAt, &post.LikesCount, &post.AuthorId, &post.IsPublished, &post.Views,
+		&post.ID, &post.Title, &post.Content, &createdAt, &post.Author, &post.Category, &post.UpdatedAt, &post.LikesCount, &post.AuthorId, &post.IsPublished, &post.Views,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -111,7 +112,8 @@ func GetPost(id int) (*Post, error) {
 		}
 		return nil, err
 	}
-	return post, nil
+	post.CreatedAt = createdAt
+	return &post, nil
 }
 
 // UpdatePost updates an existing post
