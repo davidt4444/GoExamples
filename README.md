@@ -17,8 +17,10 @@ go get github.com/go-sql-driver/mysql
 cd ..
 go mod init github.com/davidt4444/goexamples/bcs
 go get github.com/gorilla/mux
-go get github.com/davidt4444/goexamples/bcs/service
-
+go get github.com/davidt4444/goexamples/bcs/service@latest
+in the go.mod that was created add
+replace github.com/davidt4444/goexamples/bcs/service => ./service
+to the bottom of the file to point to the local service
 
 
  cd mysql

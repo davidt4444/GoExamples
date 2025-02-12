@@ -48,17 +48,17 @@ func (nt NullTime) Value() (driver.Value, error) {
 
 // Post represents the structure of the post in the database
 type Post struct {
-	ID          int        `json:"id"`
-	Title       string     `json:"title"`
-	Content     string     `json:"content"`
-	CreatedAt   NullTime   `json:"createdAt"`
-	Author      *string    `json:"author,omitempty"`
-	Category    *string    `json:"category,omitempty"`
-	UpdatedAt   *time.Time `json:"updatedAt,omitempty"`
-	LikesCount  int        `json:"likesCount"`
-	AuthorId    *int       `json:"authorId,omitempty"`
-	IsPublished bool       `json:"isPublished"`
-	Views       int        `json:"views"`
+	ID          int      `json:"id"`
+	Title       string   `json:"title"`
+	Content     string   `json:"content"`
+	CreatedAt   NullTime `json:"createdAt"`
+	Author      *string  `json:"author,omitempty"`
+	Category    *string  `json:"category,omitempty"`
+	UpdatedAt   NullTime `json:"updatedAt,omitempty"`
+	LikesCount  int      `json:"likesCount"`
+	AuthorId    *int     `json:"authorId,omitempty"`
+	IsPublished bool     `json:"isPublished"`
+	Views       int      `json:"views"`
 }
 
 var (
@@ -85,8 +85,8 @@ func init() {
 
 // CreatePost adds a new post to the database
 func CreatePost(post *Post) (int64, error) {
-	result, err := db.Exec("INSERT INTO posts (title, content, author, category, authorId, isPublished) VALUES (?, ?, ?, ?, ?, ?)",
-		post.Title, post.Content, post.Author, post.Category, post.AuthorId, post.IsPublished)
+	result, err := db.Exec("INSERT INTO posts (title, content, author, category, authorId, isPublished, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)",
+		post.Title, post.Content, post.Author, post.Category, post.AuthorId, post.IsPublished, post.CreatedAt.Time)
 	if err != nil {
 		return 0, err
 	}
@@ -97,6 +97,32 @@ func CreatePost(post *Post) (int64, error) {
 	}
 
 	return id, nil
+}
+
+// GetAllPosts retrieves all posts from the database
+func GetAllPosts() ([]Post, error) {
+	var posts []Post
+	rows, err := db.Query("SELECT id, title, content, createdAt, author, category, updatedAt, likesCount, authorId, isPublished, views FROM posts")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var post Post
+		var createdAt, updatedAt NullTime
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &createdAt, &post.Author, &post.Category, &updatedAt, &post.LikesCount, &post.AuthorId, &post.IsPublished, &post.Views); err != nil {
+			return nil, err
+		}
+		post.CreatedAt = createdAt
+		post.UpdatedAt = updatedAt
+		posts = append(posts, post)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }
 
 // GetPost retrieves a post by its ID

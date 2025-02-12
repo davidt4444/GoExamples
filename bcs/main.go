@@ -19,6 +19,7 @@ func main() {
 
 	// Routes for CRUD operations
 	router.HandleFunc("/posts", createPost).Methods("POST")
+	router.HandleFunc("/posts", getAllPosts).Methods("GET")
 	router.HandleFunc("/posts/{id}", getPost).Methods("GET")
 	router.HandleFunc("/posts/{id}", updatePost).Methods("PUT")
 	router.HandleFunc("/posts/{id}", deletePost).Methods("DELETE")
@@ -36,7 +37,9 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post.CreatedAt = time.Now()
+	// Set CreatedAt properly
+	post.CreatedAt = service.NullTime{Time: time.Now(), Valid: true}
+
 	id, err := service.CreatePost(&post)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -45,6 +48,18 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]int64{"id": id})
+}
+
+// getAllPosts handles GET requests to fetch all posts
+func getAllPosts(w http.ResponseWriter, r *http.Request) {
+	posts, err := service.GetAllPosts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
 }
 
 // GetPost handles GET requests for retrieving a specific post
