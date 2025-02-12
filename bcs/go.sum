@@ -1,2 +1,8 @@
+filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
+filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
+github.com/davidt4444/goexamples/bcs/service v0.0.0-20250212045223-9bf9cfd0b522 h1:KfeLmQkasxUot1Ek/HixWZgYouwhILvV0HiaXtx6nrc=
+github.com/davidt4444/goexamples/bcs/service v0.0.0-20250212045223-9bf9cfd0b522/go.mod h1:uG1BFG/HnzWSxA6Lhjyj9PAm2G17D0hLFRavFMW1hw4=
+github.com/go-sql-driver/mysql v1.8.1 h1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=
+github.com/go-sql-driver/mysql v1.8.1/go.mod h1:wEBSXgmK//2ZFJyE+qWnIsVGmvmEKlqwuVSjsCm7DZg=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
 github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=

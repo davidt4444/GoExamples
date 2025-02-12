@@ -13,10 +13,11 @@ cd bcs
 mkdir service
 go mod init github.com/davidt4444/goexamples/bcs/service
 go get github.com/go-sql-driver/mysql  
+// Push the changes to the repo from goexamples base
 cd ..
 go mod init github.com/davidt4444/goexamples/bcs
-
 go get github.com/gorilla/mux
+go get github.com/davidt4444/goexamples/bcs/service
 
 
 
