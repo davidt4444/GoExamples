@@ -12,6 +12,7 @@ import (
 	"github.com/davidt4444/goexamples/bcs/service"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -24,9 +25,21 @@ func main() {
 	router.HandleFunc("/posts/{id}", updatePost).Methods("PUT")
 	router.HandleFunc("/posts/{id}", deletePost).Methods("DELETE")
 
+	// CORS Configuration
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // You can replace "*" with specific origins for tighter security
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	})
+
+	// Insert the router into the CORS handler
+	handler := c.Handler(router)
+
 	// Start server
 	log.Println("Starting server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
 
 // CreatePost handles POST requests to add new posts

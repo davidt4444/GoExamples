@@ -7,6 +7,7 @@ require (
 	github.com/davidt4444/goexamples/bcs/service v0.0.0-20250212045223-9bf9cfd0b522 // indirect
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/rs/cors v1.11.1 // indirect
 )
 
 replace github.com/davidt4444/goexamples/bcs/service => ./service

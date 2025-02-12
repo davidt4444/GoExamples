@@ -1,0 +1,374 @@
+Generate a vue.js front end that calls the go service for all of the crud operations
+Below, I'll outline a basic Vue.js frontend that interacts with your Go service for CRUD operations. We'll use Vue Router for navigation and Axios for making HTTP requests. 
+
+Project Setup:
+Install Vue CLI if you haven't:
+
+sh
+npm install -g @vue/cli
+
+Create a new Vue project:
+
+sh
+vue create vue-crud-app
+
+Choose the default preset or customize as needed. 
+
+Install Axios for HTTP requests:
+
+sh
+cd vue-crud-app
+npm install axios
+
+Install Vue Router for routing:
+
+sh
+npm install vue-router
+
+Vue.js Setup:
+main.js
+javascript
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+
+const app = createApp(App)
+app.use(router)
+app.use(VueAxios, axios)
+app.mount('#app')
+
+router/index.js
+javascript
+import { createRouter, createWebHistory } from 'vue-router'
+import Home from '../views/Home.vue'
+import CreatePost from '../views/CreatePost.vue'
+import EditPost from '../views/EditPost.vue'
+
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: Home
+  },
+  {
+    path: '/create',
+    name: 'CreatePost',
+    component: CreatePost
+  },
+  {
+    path: '/edit/:id',
+    name: 'EditPost',
+    component: EditPost
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
+  routes
+})
+
+export default router
+
+App.vue
+vue
+<template>
+  <div id="app">
+    <router-view></router-view>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'App'
+}
+</script>
+
+Components:
+views/Home.vue
+vue
+<template>
+  <div>
+    <h1>Posts</h1>
+    <router-link :to="{ name: 'CreatePost' }">Create New Post</router-link>
+    <ul>
+      <li v-for="post in posts" :key="post.id">
+        <p>{{ post.title }}</p>
+        <router-link :to="{ name: 'EditPost', params: { id: post.id }}">Edit</router-link>
+        <button @click="deletePost(post.id)">Delete</button>
+      </li>
+    </ul>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      posts: []
+    }
+  },
+  mounted() {
+    this.fetchPosts()
+  },
+  methods: {
+    fetchPosts() {
+      this.axios.get('http://localhost:8080/posts')
+        .then(response => {
+          this.posts = response.data
+        })
+        .catch(error => {
+          console.error('Error fetching posts:', error)
+        })
+    },
+    deletePost(id) {
+      this.axios.delete(`http://localhost:8080/posts/${id}`)
+        .then(() => {
+          this.fetchPosts() // Refresh posts after deletion
+        })
+        .catch(error => {
+          console.error('Error deleting post:', error)
+        })
+    }
+  }
+}
+</script>
+
+views/CreatePost.vue
+vue
+<template>
+  <div>
+    <h1>Create Post</h1>
+    <form @submit.prevent="createPost">
+      <input v-model="title" placeholder="Title" required>
+      <textarea v-model="content" placeholder="Content" required></textarea>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      title: '',
+      content: ''
+    }
+  },
+  methods: {
+    createPost() {
+      this.axios.post('http://localhost:8080/posts', {
+        title: this.title,
+        content: this.content
+      })
+      .then(() => {
+        this.$router.push({ name: 'Home' }) // Navigate back to home after creation
+      })
+      .catch(error => {
+        console.error('Error creating post:', error)
+      })
+    }
+  }
+}
+</script>
+
+views/EditPost.vue
+vue
+<template>
+  <div>
+    <h1>Edit Post</h1>
+    <form @submit.prevent="updatePost">
+      <input v-model="title" placeholder="Title" required>
+      <textarea v-model="content" placeholder="Content" required></textarea>
+      <button type="submit">Update</button>
+    </form>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      title: '',
+      content: ''
+    }
+  },
+  mounted() {
+    this.fetchPost()
+  },
+  methods: {
+    fetchPost() {
+      this.axios.get(`http://localhost:8080/posts/${this.$route.params.id}`)
+        .then(response => {
+          this.title = response.data.title
+          this.content = response.data.content
+        })
+        .catch(error => {
+          console.error('Error fetching post:', error)
+        })
+    },
+    updatePost() {
+      this.axios.put(`http://localhost:8080/posts/${this.$route.params.id}`, {
+        title: this.title,
+        content: this.content
+      })
+      .then(() => {
+        this.$router.push({ name: 'Home' }) // Navigate back to home after update
+      })
+      .catch(error => {
+        console.error('Error updating post:', error)
+      })
+    }
+  }
+}
+</script>
+
+This setup assumes your Go service is running on localhost:8080. You'll need to adjust the URLs in the Vue components if your Go service runs on a different address or port. Also, ensure CORS is configured on your backend if you're running the frontend on a different domain or port. 
+
+This is a basic CRUD setup for Vue.js; you might want to add more features like error handling, loading states, or improved user feedback. Remember to secure your endpoints and handle more complex data scenarios as your application grows.
+I'm getting   1:1  error  Component name "Home" should always be multi-word  vue/multi-word-component-names
+The error you're encountering is due to Vue.js best practices suggesting that component names should be multi-word to avoid potential conflicts with HTML elements and to improve clarity. Here's how you can resolve this issue by renaming your components:
+
+Update router/index.js:
+javascript
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+import CreatePostView from '../views/CreatePostView.vue'
+import EditPostView from '../views/EditPostView.vue'
+
+const routes = [
+  {
+    path: '/',
+    name: 'HomeView',
+    component: HomeView
+  },
+  {
+    path: '/create',
+    name: 'CreatePostView',
+    component: CreatePostView
+  },
+  {
+    path: '/edit/:id',
+    name: 'EditPostView',
+    component: EditPostView
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
+  routes
+})
+
+export default router
+
+Rename Your Vue Files:
+Rename Home.vue to HomeView.vue
+Rename CreatePost.vue to CreatePostView.vue
+Rename EditPost.vue to EditPostView.vue
+
+Update the Content in Each Vue File:
+views/HomeView.vue
+vue
+<template>
+  <!-- Template content here -->
+</template>
+
+<script>
+export default {
+  name: 'HomeView',
+  // Other component properties
+}
+</script>
+
+views/CreatePostView.vue
+vue
+<template>
+  <!-- Template content here -->
+</template>
+
+<script>
+export default {
+  name: 'CreatePostView',
+  // Other component properties
+}
+</script>
+
+views/EditPostView.vue
+vue
+<template>
+  <!-- Template content here -->
+</template>
+
+<script>
+export default {
+  name: 'EditPostView',
+  // Other component properties
+}
+</script>
+
+By making these changes:
+
+You've renamed your components to follow the multi-word naming convention which should resolve the ESLint error you're seeing.
+The name property in the component's script section matches the file name for consistency and clarity.
+
+After these updates, your Vue.js application should no longer flag this particular linting error. Remember to update any references to these components throughout your application if necessary.
+I'm getting ERROR in ./src/main.js 5:0-33
+Module not found: Error: Can't resolve 'vue-axios' in '/Users/davidthigpen/Library/Mobile Documents/comappleCloudDocs/Documents/resume/github/GoExamples/vue-crud-app/src'
+The error you're encountering indicates that the module vue-axios could not be found. This could happen for a couple of reasons:
+
+Typo in the Package Name or Installation: You might have installed axios but not vue-axios. 
+Vue-Axios Dependency: vue-axios is not a direct package from npm; it's typically meant to be used with Vue 2. For Vue 3, the approach to integrating Axios has changed slightly.
+
+Given you're likely using Vue 3, here's how you can resolve this:
+
+Option 1: Use Vue 3's New Composition API with Axios
+Instead of using vue-axios, you can directly use Axios with Vue 3 by creating a plugin or simply importing it in your components. Here's how you can modify your main.js:
+
+javascript
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+import axios from 'axios'
+
+const app = createApp(App)
+app.use(router)
+app.config.globalProperties.$axios = axios // Make axios globally available
+app.mount('#app')
+
+Now, in your components, you can use this.$axios like so:
+
+javascript
+this.$axios.get('...').then(...)
+
+Option 2: If You Actually Meant to Use Vue-Axios for Vue 2:
+If you intended to use vue-axios for Vue 2, you need to install it:
+
+sh
+npm install vue-axios
+
+Then modify main.js for Vue 2:
+
+javascript
+import Vue from 'vue'
+import App from './App.vue'
+import router from './router'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+
+Vue.use(VueAxios, axios)
+Vue.config.productionTip = false
+
+new Vue({
+  router,
+  render: h => h(App)
+}).$mount('#app')
+
+Important: The above Vue 2 setup is only if you're using Vue 2. Since you're using createApp in main.js, it seems like you're on Vue 3, so Option 1 is more likely what you need.
+
+Final Check:
+Ensure axios is installed (npm install axios if not).
+If you're indeed on Vue 3, follow Option 1 for integrating Axios with your Vue application.
+Update your components to use this.$axios or axios directly as per the method you choose.
+
+After these changes, the "Module not found" error should be resolved. Remember, if you're using Vue 3, using vue-axios directly isn't the recommended approach anymore.

@@ -17,6 +17,7 @@ go get github.com/go-sql-driver/mysql
 cd ..
 go mod init github.com/davidt4444/goexamples/bcs
 go get github.com/gorilla/mux
+go get github.com/rs/cors
 go get github.com/davidt4444/goexamples/bcs/service@latest
 in the go.mod that was created add
 replace github.com/davidt4444/goexamples/bcs/service => ./service

@@ -840,3 +840,77 @@ Service Layer (service.go): The GetAllPosts function uses db.Query to fetch all 
 HTTP Handler (main.go): The getAllPosts function fetches all posts from the service layer and sends them back as a JSON response. This handler uses the GET method on the /posts endpoint without an ID parameter to signify it's retrieving all posts.
 
 With these changes, you can now make a GET request to /posts to retrieve all posts in your database. Remember to handle pagination, sorting, or filtering if your dataset grows large, as these operations can become resource-intensive.
+
+What are the steps to allow cors in the go service
+To allow CORS (Cross-Origin Resource Sharing) in your Go service, you need to set the appropriate HTTP headers on your responses. Here's how you can do it:
+
+Step 1: Install a CORS Handler
+While you can manually set headers for each request, using a library like rs/cors simplifies the process and reduces boilerplate code. Install it using:
+
+sh
+go get github.com/rs/cors
+
+Step 2: Modify Your main.go to Use CORS
+Here's how you can wrap your router with CORS middleware:
+
+go
+package main
+
+import (
+    "database/sql"
+    "encoding/json"
+    "log"
+    "net/http"
+    "strconv"
+    "time"
+
+    _ "github.com/go-sql-driver/mysql"
+    "github.com/gorilla/mux"
+    "github.com/rs/cors"
+    "your-module-name/service" // Adjust this to your actual module path
+)
+
+func main() {
+    router := mux.NewRouter()
+
+    // Routes for CRUD operations
+    router.HandleFunc("/posts", createPost).Methods("POST")
+    router.HandleFunc("/posts/{id}", getPost).Methods("GET")
+    router.HandleFunc("/posts/{id}", updatePost).Methods("PUT")
+    router.HandleFunc("/posts/{id}", deletePost).Methods("DELETE")
+    router.HandleFunc("/posts", getAllPosts).Methods("GET")
+
+    // CORS Configuration
+    c := cors.New(cors.Options{
+        AllowedOrigins:   []string{"*"}, // You can replace "*" with specific origins for tighter security
+        AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+        AllowCredentials: true,
+        MaxAge:           300, // Maximum value not ignored by any of major browsers
+    })
+
+    // Insert the router into the CORS handler
+    handler := c.Handler(router)
+
+    // Start server
+    log.Println("Starting server on :8080")
+    log.Fatal(http.ListenAndServe(":8080", handler))
+}
+
+// Your CRUD handler functions here...
+
+Explanation:
+CORS Configuration: The cors.Options struct is configured with:
+AllowedOrigins: Here, "*" allows requests from any origin. In production, you should specify the exact domains you trust.
+AllowedMethods: Lists HTTP methods allowed in CORS requests.
+AllowedHeaders: Specifies which headers are allowed in preflight requests.
+AllowCredentials: If true, cookies are allowed in CORS requests.
+MaxAge: Sets the cache duration for preflight requests.
+Middleware: The c.Handler(router) wraps your router with CORS middleware. This means every request will be checked against the CORS policy before being passed to your application's handlers.
+
+Important Notes:
+Security Consideration: Setting AllowedOrigins to ["*"] is permissive and not recommended for production. Restrict this to your frontend's origin(s) for better security.
+Preflight Requests: CORS uses OPTIONS requests for preflight checks. This setup automatically handles those for you.
+Testing: After adding CORS, test with your Vue.js frontend from a different port or domain to ensure CORS works as expected.
+
+By following these steps, your Go service should now respond with the appropriate CORS headers, allowing your Vue.js application to make requests from different origins.
