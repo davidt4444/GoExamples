@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"log"
@@ -11,12 +12,46 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+type NullTime struct {
+	Time  time.Time
+	Valid bool // Valid is true if Time is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (nt *NullTime) Scan(value interface{}) error {
+	if value == nil {
+		nt.Time, nt.Valid = time.Time{}, false
+		return nil
+	}
+	switch v := value.(type) {
+	case time.Time:
+		nt.Time, nt.Valid = v, true
+		return nil
+	case []byte:
+		t, err := time.Parse("2006-01-02 15:04:05", string(v))
+		if err != nil {
+			return err
+		}
+		nt.Time, nt.Valid = t, true
+		return nil
+	}
+	return fmt.Errorf("Failed to scan time: %v", value)
+}
+
+// Value implements the driver Valuer interface.
+func (nt NullTime) Value() (driver.Value, error) {
+	if !nt.Valid {
+		return nil, nil
+	}
+	return nt.Time, nil
+}
+
 // Post represents the structure of the post in the database
 type Post struct {
 	ID          int        `json:"id"`
 	Title       string     `json:"title"`
 	Content     string     `json:"content"`
-	CreatedAt   time.Time  `json:"createdAt"`
+	CreatedAt   NullTime   `json:"createdAt"`
 	Author      *string    `json:"author,omitempty"`
 	Category    *string    `json:"category,omitempty"`
 	UpdatedAt   *time.Time `json:"updatedAt,omitempty"`
